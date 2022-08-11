@@ -1,0 +1,80 @@
+version: '3.9'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.5
+    restart: unless-stopped
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      discovery.type: single-node
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.5
+    restart: unless-stopped
+    ports:
+      - 5044:5044
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+    volumes:
+      - ./config/logstash:/usr/share/logstash/pipeline/
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.5
+    restart: unless-stopped
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    depends_on:
+      - elasticsearch
+    networks:
+      - elastic
+  nginx:
+    image: nginx:latest
+    restart: unless-stopped
+    ports:
+      - 8010:80
+    volumes:
+      - ./apps/logs/nginx:/var/log/nginx
+    networks:
+      - elastic
+  filebeat-nginx:
+    image: docker.elastic.co/beats/filebeat:7.17.5
+    restart: unless-stopped
+    volumes:
+      - ./config/filebeat/filebeat-nginx.yml:/usr/share/filebeat/filebeat.yml
+      - ./apps/logs/nginx:/data/log/nginx/
+    networks:
+      - elastic
+  node-api:
+    build: ./apps/node-api
+    ports:
+      - 3000:3000
+    volumes:
+      - ./apps/logs/node-api:/usr/src/app/logs
+    networks:
+      - elastic
+  filebeat-node-api:
+    image: docker.elastic.co/beats/filebeat:7.17.5
+    restart: unless-stopped
+    volumes:
+      - ./config/filebeat/filebeat-node-api.yml:/usr/share/filebeat/filebeat.yml
+      - ./apps/logs/node-api:/data/log/node-api/
+    networks:
+      - elastic
+
+volumes:
+  elasticsearch:
+
+networks:
+  elastic:
+    name: elastic
+    driver: bridge

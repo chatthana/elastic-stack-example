@@ -1,0 +1,15 @@
+# filebeat.inputs:
+#   - type: log
+#     enabled: true
+#     paths:
+#       - /data/log/nginx/*
+
+filebeat.modules:
+  - module: nginx
+    access:
+      var.paths: ["/data/log/nginx/access.log"]
+    error:
+      var.paths: ["/data/log/nginx/error.log"]
+
+output.logstash:
+  hosts: ["logstash:5044"]
