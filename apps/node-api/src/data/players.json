@@ -1,0 +1,16 @@
+[
+  {
+    "id": "fe2add38-e05a-4722-80d3-f530ab33b935",
+    "firstname": "Darwin",
+    "lastname": "Nunez",
+    "currentClub": "Liverpool",
+    "shirtNo": 27
+  },
+  {
+    "id": "473993e0-83ce-4bc7-b54d-d5a24cdf522f",
+    "firstname": "Cristiano",
+    "lastname": "Ronaldo",
+    "currentClub": "Manchester United",
+    "shirtNo": 7
+  }
+]
